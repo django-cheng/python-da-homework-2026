@@ -29,7 +29,21 @@ def green_bar_category():
     提示：sns.countplot 或 value_counts().plot.bar()
     """
     # TODO: 你的程式碼
-    pass
+    cate_count = df['category'].value_counts().reset_index()
+    cate_count.columns = ['category', 'order_count']
+
+    fig, ax = plt.subplots(figsize=(8,4))
+    sns.barplot(
+        data = cate_count,
+        x = 'category',
+        y = 'order_count',
+        hue = 'category',
+        palette = 'viridis',
+        legend = False,
+        ax = ax,
+    )
+    plt.tight_layout()
+    return plt
 
 
 def green_hist_amount():
@@ -39,7 +53,17 @@ def green_hist_amount():
     提示：sns.histplot(bins=20) 或 plt.hist()
     """
     # TODO: 你的程式碼
-    pass
+    fig, ax = plt.subplots(figsize = (8,4))
+    sns.histplot(
+        data = df,
+        x = 'amount',
+        bins = 20,
+        ax = ax,
+    )
+    ax.set_xlabel('Amount(NT$)')
+    ax.set_ylabel('Frequency')
+    plt.tight_layout()
+    return fig
 
 
 def green_set_labels():
@@ -51,7 +75,26 @@ def green_set_labels():
     回傳 matplotlib Figure 物件
     """
     # TODO: 你的程式碼
-    pass
+    cate_count = df['category'].value_counts().reset_index()
+    cate_count.columns = ['category', 'order_count']
+
+    fig, ax = plt.subplots(figsize=(8,4))
+    sns.barplot(
+        data = cate_count,
+        x = 'category',
+        y = 'order_count',
+        hue = 'category',
+        palette = 'viridis',
+        legend = False,
+        ax = ax,
+    )
+    ax.set_title('Order Count by Category', fontweight='bold')
+    ax.set_xlabel('Category')
+    ax.set_ylabel('Order Count')
+
+    plt.tight_layout()
+    return fig
+
 
 
 # ============================================================
@@ -68,7 +111,32 @@ def yellow_line_region_trend():
     提示：分別 groupby 再 plot，或用 sns.lineplot(hue='region')
     """
     # TODO: 你的程式碼
-    pass
+    ns_df = df[df['region'].isin(['North', 'South'])].copy()
+    ns_df['month'] = ns_df['order_date'].dt.to_period('M')
+
+    monthly_ns = (
+        ns_df.groupby(['month', 'region'])['amount']
+        .sum()
+        .reset_index()
+    )
+    monthly_ns['month'] = monthly_ns['month'].astype(str)
+
+    fig, ax = plt.subplots(figsize = (10, 4))
+    sns.lineplot(
+        data = monthly_ns,
+        hue = 'region',
+        x = 'month',
+        y = 'amount',
+        marker = 'o',
+        linewidth = 2,
+    )
+    ax.set_title('Monthly Revenue: North vs South', fontweight='bold')
+    ax.set_xlabel('Month')
+    ax.set_ylabel('Revenue(NT$)')
+    plt.xticks(rotation = 45)
+    ax.legend(title = 'Region')
+    plt.tight_layout
+    return fig
 
 
 def yellow_box_vip():
@@ -78,7 +146,21 @@ def yellow_box_vip():
     提示：sns.boxplot(x='vip_level', y='amount', data=df)
     """
     # TODO: 你的程式碼
-    pass
+    fig, ax = plt.subplots(figsize=(9, 5))
+    sns.boxplot(
+        data = df,
+        x = 'vip_level',
+        y = 'amount',
+        hue = 'vip_level',
+        palette = 'Set3',
+        legend = False,
+        ax = ax
+    )
+    ax.set_title('Order Amount Distribution by VIP Level', fontweight='bold')
+    ax.set_xlabel('VIP Level')
+    ax.set_ylabel('Amount(NT$)')
+    plt.tight_layout()
+    return fig
 
 
 def yellow_scatter_price_amount():
@@ -88,7 +170,20 @@ def yellow_scatter_price_amount():
     提示：plt.scatter() 或 sns.scatterplot()
     """
     # TODO: 你的程式碼
-    pass
+    fig, ax = plt.subplots(figsize=(8, 4))
+    sns.scatterplot(
+        data = df,
+        x = 'unit_price',
+        y = 'amount',
+        alpha = 0.5,
+        ax = ax
+    )
+    ax.set_title('Unit Price vs Amount')
+    ax.set_xlabel('Unit Price(NT$)')
+    ax.set_ylabel('Amount(NT$)')
+    plt.tight_layout()
+    return fig
+
 
 
 # ============================================================
@@ -107,4 +202,35 @@ def red_category_dashboard(category="Electronics"):
     提示：fig, axes = plt.subplots(2, 2, figsize=(14, 10))
     """
     # TODO: 你的程式碼
-    pass
+    cat_df = df[df['category'] == category].copy()
+    cat_df['month'] = cat_df['order_date'].dt.to_period('M').astype(str)
+    
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+    fig.suptitle(f'{category} Dashboard', fontsize=16, fontweight='bold')
+    
+    monthly = cat_df.groupby('month')['amount'].sum().reset_index()
+    sns.lineplot(data=monthly, x='month', y='amount', marker='o', ax=axes[0, 0])
+    axes[0, 0].set_title('Monthly Revenue Trend')
+    axes[0, 0].set_xlabel('Month')
+    axes[0, 0].set_ylabel('Revenue')
+    axes[0, 0].tick_params(axis='x', rotation=45)
+    
+    region = cat_df.groupby('region')['amount'].sum().reset_index()
+    sns.barplot(data=region, x='region', y='amount', palette='viridis', ax=axes[0, 1])
+    axes[0, 1].set_title('Revenue by Region')
+    axes[0, 1].set_xlabel('Region')
+    axes[0, 1].set_ylabel('Revenue')
+    
+    top5 = cat_df.groupby('product_name')['amount'].sum().nlargest(5).reset_index()
+    sns.barplot(data=top5, x='amount', y='product_name', palette='viridis', ax=axes[1, 0])
+    axes[1, 0].set_title('Top 5 Products')
+    axes[1, 0].set_xlabel('Revenue')
+    axes[1, 0].set_ylabel('Product')
+    
+    sns.histplot(data=cat_df, x='amount', bins=20, ax=axes[1, 1])
+    axes[1, 1].set_title('Amount Distribution')
+    axes[1, 1].set_xlabel('Amount')
+    axes[1, 1].set_ylabel('Frequency')
+    
+    plt.tight_layout()
+    return fig

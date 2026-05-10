@@ -20,7 +20,8 @@ def green_read_csv():
     提示：pd.read_csv()
     """
     # TODO: 你的程式碼
-    pass
+    df_raw = pd.read_csv()
+    return df_raw
 
 
 def green_shape(df):
@@ -29,7 +30,9 @@ def green_shape(df):
     提示：df.shape
     """
     # TODO: 你的程式碼
-    pass
+    df_shape = df.shape
+    return df_shape
+
 
 
 def green_dtypes(df):
@@ -38,7 +41,8 @@ def green_dtypes(df):
     提示：df.dtypes
     """
     # TODO: 你的程式碼
-    pass
+    df_dtypes = df.dtypes
+    return df_dtypes
 
 
 # ============================================================
@@ -52,7 +56,9 @@ def yellow_clean_columns(df):
     提示：df.columns.str.strip().str.lower()
     """
     # TODO: 你的程式碼
-    pass
+    df_clean = df.copy()
+    df_clean.columns = df_clean.columns.str.strip().str.lower()
+    return df_clean
 
 
 def yellow_clean_amount(df):
@@ -63,7 +69,16 @@ def yellow_clean_amount(df):
     提示：.str.replace() + .astype(float)
     """
     # TODO: 你的程式碼
-    pass
+    df_clean = df.copy()
+    df_clean['amount'] = (
+    df_clean['amount']
+    .astype(str)
+    .str.replace('$', '', regex = False)
+    .str.replace(',', '', regex = False)
+    .astype(float)
+    )
+    return df_clean
+
 
 
 def yellow_drop_duplicates(df):
@@ -72,7 +87,8 @@ def yellow_drop_duplicates(df):
     提示：df.drop_duplicates()
     """
     # TODO: 你的程式碼
-    pass
+    df_duplicates = df.drop_duplicates()
+    return df_duplicates
 
 
 # ============================================================
@@ -93,4 +109,24 @@ def red_clean_orders(path):
     提示：pd.to_datetime(errors='coerce')
     """
     # TODO: 你的程式碼
-    pass
+    df = pd.read_csv(path)
+    df_before = len(df)
+
+    df_columns = df.columns.str.strip().str.lower()
+
+    df['amount'] = (
+        df['amount']
+        .astype(str)
+        .str.replace('$', '', regex = False)
+        .str.replace(',', '', regex = False)
+        .astype(float)
+    )
+
+    df['order_date'] = pd.to_datetime(df['order_date'], errors='coerce')
+    df = df.dropna(subset = ['amount', 'order_date'])
+    df = df.drop_duplicates()
+    df_after = len(df)
+    
+    print(f"清理之前{df_before},清理之後{df_after}")
+    print('-----------------------------')
+    return df

@@ -24,19 +24,24 @@ def green_load_and_merge():
     提示：pd.merge(how='left')
     """
     # TODO: 你的程式碼
-    pass
+    df = (
+        orders
+        .merge(customers, on='customer_id', how='left')
+        .merge(products, on='product_id', how='left')
+    )
+    return df
 
 
 def green_row_count(df):
     """回傳 DataFrame 的列數 (int)"""
     # TODO: 你的程式碼
-    pass
+    return len(df)
 
 
 def green_column_list(df):
     """回傳 DataFrame 的所有欄位名稱 (list)"""
     # TODO: 你的程式碼
-    pass
+    return list(df.columns)
 
 
 # ============================================================
@@ -50,8 +55,8 @@ def yellow_top_category(df):
     提示：groupby('category')['amount'].sum()
     """
     # TODO: 你的程式碼
-    pass
-
+    df_category = df.groupby('category')['amount'].sum()
+    return df_category.idxmax()
 
 def yellow_gold_vip_stats(df):
     """
@@ -60,7 +65,10 @@ def yellow_gold_vip_stats(df):
     提示：df[df['vip_level'] == 'Gold']
     """
     # TODO: 你的程式碼
-    pass
+    gold = df[df['vip_level'] == 'Gold']
+    gold_count = len(gold)
+    gold_total = gold['amount'].sum()
+    return (gold_count, gold_total)
 
 
 def yellow_region_avg_amount(df):
@@ -70,7 +78,13 @@ def yellow_region_avg_amount(df):
     提示：groupby('region')['amount'].mean()
     """
     # TODO: 你的程式碼
-    pass
+    region_mean = (
+        df.groupby('region')['amount']
+        .mean()
+        .round(2)
+        .sort_values(ascending=False)
+    )
+    return region_mean
 
 
 # ============================================================
@@ -94,4 +108,16 @@ def red_rfm_top5(df):
     提示：groupby('customer_id').agg(...)
     """
     # TODO: 你的程式碼
-    pass
+    rfm = (
+        df.groupby(['customer_id', 'customer_name'])
+        .agg(
+            r = ('order_date', 'max'),
+            f = ('order_id', 'count'),
+            m = ('amount', 'sum'),
+        )
+        .reset_index()
+        .sort_values('m', ascending=False)
+        .head(5)
+    )
+
+    return rfm
